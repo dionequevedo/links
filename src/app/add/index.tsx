@@ -9,23 +9,56 @@ import { Input } from '@/components/input';
 import { Button } from '@/components/button';
 
 import { Categories } from '@/components/categories';
+import { linkStorage } from '@/storage/link-storage';
 
 export default function Add() {
   const [category, setCategory] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [url, setUrl] = useState<string>('');
 
-  function handleAdd(){
-    if(!category){
-      return Alert.alert("Categoria não informada", "Selecione a categoria!");
-    } else if(!name.trim() || name.length < 5){
-      return Alert.alert("Nome não informado", "Informe um nome!");
-    } else if(!url.trim() || url.length < 6){
-      return Alert.alert("URL não informada", "Informe o site!");
-    }
+  async function handleAdd() {
+    try {
 
-     
-    console.log("categoria: ", category," | nome: ",name," | URL: ", url);
+      if (!category && !name.trim() && !url.trim()) {
+        return Alert.alert("Campos não preenchidos", "Selecione uma categoria e preencha todos os campos!");
+      } else if (!category) {
+        return Alert.alert("Categoria não informada", "Selecione a categoria!");
+      } else if (!name.trim() || name.length < 5) {
+        return Alert.alert("Nome não informado", "Informe um nome!");
+      } else if (!url.trim() || url.length < 6) {
+        return Alert.alert("URL não informada", "Informe o site!");
+      } else {
+        // Validação de URL simples usando regex
+        const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/i;
+        if (!urlPattern.test(url.trim())) {
+          return Alert.alert("URL inválida", "Informe uma URL válida!");
+        }
+      }
+
+      await linkStorage.save({
+
+        id: String(new Date().getTime()),
+        category,
+        name,
+        url
+      });
+
+      const data = await linkStorage.get();
+
+      if(data){
+        Alert.alert("Sucesso", "Link adicionado com sucesso!");
+        router.push("./");
+        setCategory('');
+        setName('');
+        setUrl('');
+
+        console.log("Links salvos:", data);
+      }
+
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao adicionar o link.");
+      console.error(error);
+    }
   }
 
     return (
@@ -43,12 +76,17 @@ export default function Add() {
       <Categories onChange={setCategory} selected={category} />
 
         <View style={styles.form}>
-            <Input placeholder="Nome" onChangeText={setName} autocorrect={false}/>
-            <Input placeholder="URL" onChangeText={setUrl} autocorrect={false}/>
+            <Input 
+            placeholder="Nome" 
+            onChangeText={setName} 
+            autocorrect={false}/>
+            <Input 
+            placeholder="URL" 
+            onChangeText={setUrl} 
+            autocorrect={false}
+            autoCapitalize="none"/>
             <Button title="Adicionar" onPress={handleAdd}></Button>
-        </View>
-        <Text style={styles.title}>{name}</Text>
-        <Text style={styles.title}>{url}</Text>
+        </View>        
     </View>
   );
 }
