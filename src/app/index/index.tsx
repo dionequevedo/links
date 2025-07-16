@@ -1,15 +1,17 @@
 import {Image, View, TouchableOpacity, FlatList, Modal, Text } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Route, router } from 'expo-router'
+import { useState } from 'react'
+import { Categories } from '@/components/categories'
 
 import { styles } from "./styles"
 import { colors } from "@/styles/colors"
 import { Link} from '@/components/Link'
 import { Option } from '@/components/options'
-
-import { Categories } from '@/components/categories'
+import { categories } from '@/utils/categories'
 
 export default function Index(){
+    const [category, setCategory] = useState<string>(categories[0].name);
     return(
         <View style={styles.container}>
             <View style={styles.header}>
@@ -20,7 +22,7 @@ export default function Index(){
                 </TouchableOpacity>
             </View>
 
-            <Categories />
+            <Categories onChange={setCategory} selected={category}/>
          
                      <FlatList
                 data={["1", "2", "3", "4", "5", "6"]}
