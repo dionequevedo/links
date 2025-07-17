@@ -46,8 +46,13 @@ export default function Add() {
       const data = await linkStorage.get();
 
       if(data){
-        Alert.alert("Sucesso", "Link adicionado com sucesso!");
-        router.push("./");
+        Alert.alert("Sucesso", "Link adicionado com sucesso!",
+          [
+            {
+              text: "Ok", 
+              onPress: () => router.back()
+            }
+          ]);
         setCategory('');
         setName('');
         setUrl('');
@@ -75,14 +80,16 @@ export default function Add() {
 
         <View style={styles.form}>
             <Input 
-            placeholder="Nome" 
-            onChangeText={setName} 
-            autocorrect={false}/>
+              placeholder="Nome" 
+              onChangeText={setName} 
+              autocorrect={false}
+            />
             <Input 
-            placeholder="URL" 
-            onChangeText={setUrl} 
-            autocorrect={false}
-            autoCapitalize="none"/>
+              placeholder="URL" 
+              onChangeText={setUrl} 
+              autocorrect={false}
+              autoCapitalize="none"
+            />
             <Button title="Adicionar" onPress={handleAdd}></Button>
         </View>        
     </View>

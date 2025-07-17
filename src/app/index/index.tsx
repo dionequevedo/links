@@ -1,4 +1,5 @@
-import {Image, 
+import {
+    Image, 
     View, 
     TouchableOpacity, 
     FlatList, 
@@ -6,12 +7,19 @@ import {Image,
     Text,
     Alert 
 } from 'react-native'
+
 import { MaterialIcons } from '@expo/vector-icons'
-import { Route, router } from 'expo-router'
+
+import { 
+    useFocusEffect
+    , router 
+} from 'expo-router'
+
 import { 
     useState,
-    useEffect 
+    useCallback 
 } from 'react'
+
 import { Categories } from '@/components/categories'
 
 import { styles } from "./styles"
@@ -23,7 +31,6 @@ import {
     linkStorage, 
     LinkStorage 
 } from '@/storage/link-storage'
-import { Category } from '@/components/category'
 
 
 
@@ -31,20 +38,61 @@ export default function Index(){
 
     const [category, setCategory] = useState<string>(categories[0].name);
     const [links, setLinks] = useState<LinkStorage[]>();
-    const [url, setUrl] = useState<string>('');
+    const [showModal, setShowModal] = useState(false);
+    const [link, setLink] = useState<LinkStorage>({} as LinkStorage);
 
     async function getLinks() {
         try {
             const response = await linkStorage.get();
-            setLinks(response);
+            const filtered = response.filter((link) => link.category === category);
+            if (filtered.length === 0) {
+                Alert.alert("Nenhum link encontrado", "Adicione um novo link para ver aqui.");
+                setLinks([]);
+            }else if (filtered.length > 0) {
+                setLinks(filtered);
+            }
         } catch (error) {
             Alert.alert("Erro", "Não foi possível obter os links:");
         }
     }
 
-    useEffect(() => {
+    function hanleDetails(selected: LinkStorage) {
+        setShowModal(true);
+        setLink(selected);
+    }
+
+    async function linkRemove() {
+        try {
+            await linkStorage.remove(link.id);
+            getLinks();
+            setShowModal(false);
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível excluir o link.");
+        }
+    }
+
+    function handleRemove() {
+        Alert.alert(
+            "Deletar link",
+            `Deseja deletar o link ${link.name}?`,
+            [
+                {
+                    text: "Cancelar",
+                    style: "cancel"
+                },
+                {
+                    text: "Deletar",
+                    onPress: linkRemove
+                }
+            ]
+        );
+    }
+
+    useFocusEffect(
+        useCallback(() => {
         getLinks();
-    }, [Category]);
+    }, [category])
+    );
 
     return(
         <View style={styles.container}>
@@ -65,7 +113,7 @@ export default function Index(){
                         <Link 
                             name={item.name}
                             url={item.url}
-                            onDetails={() => console.log("Clicou!")}
+                            onDetails={() => hanleDetails(item)}
                         />
                     )}
                 style={styles.links}
@@ -73,26 +121,32 @@ export default function Index(){
                     showsVerticalScrollIndicator={false}
                 />
 
-            <Modal transparent visible={false}>
+            <Modal transparent visible={showModal}  animationType="slide">
                 <View style={styles.modal}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalCategory}>
-                                Curso
+                                {link ? link.category : ''}
                             </Text>
-                            <TouchableOpacity>
-                                <MaterialIcons name="close" size={20} color={colors.gray[400]} />
+
+                            <TouchableOpacity onPress={() => setShowModal(false)} activeOpacity={0.7}>
+                                <MaterialIcons 
+                                    name="close" 
+                                    size={20} 
+                                    color={colors.gray[400]} 
+                                />
                             </TouchableOpacity>
                         </View>
+
                         <Text style={styles.modalLinkName}>
-                            RockeSeat
+                            {link ? link.name : ''}
                         </Text>
                         <Text style={styles.modalUrl}>
-                        https://rocketseat.com.br/
+                            {link ? link.url : ''}
                         </Text>
                         <View style={styles.modalFooter}>
                             <Option name='Abrir' icon="language"/>
-                            <Option name='Deletar' icon='delete' variant='secondary'/>
+                            <Option name='Excluir' icon='delete' variant='secondary' onPress={handleRemove}/>
                         </View>
                     </View>
                 </View>
