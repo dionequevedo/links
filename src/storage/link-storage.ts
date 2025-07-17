@@ -34,16 +34,15 @@ async function save(newLink: LinkStorage): Promise<void> {
     }
 }
 
-async function remove(id: string){
+async function remove(id: string): Promise<void> {
     try {
         const storage = await get();
         const updated = storage.filter(link => link.id !== id);
+        
         if (updated.length === 0) {
             await AsyncStorage.removeItem(LINK_STORAGE_KEY);
-            return updated  ? updated : [];
-        } else if (updated.length > 0) {
+        } else {
             await AsyncStorage.setItem(LINK_STORAGE_KEY, JSON.stringify(updated));
-            return [];
         }
     } catch (error) {
         console.error("Error removing link:", error);
