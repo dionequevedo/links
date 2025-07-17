@@ -1,7 +1,17 @@
-import {Image, View, TouchableOpacity, FlatList, Modal, Text } from 'react-native'
+import {Image, 
+    View, 
+    TouchableOpacity, 
+    FlatList, 
+    Modal, 
+    Text,
+    Alert 
+} from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Route, router } from 'expo-router'
-import { useState } from 'react'
+import { 
+    useState,
+    useEffect 
+} from 'react'
 import { Categories } from '@/components/categories'
 
 import { styles } from "./styles"
@@ -9,9 +19,33 @@ import { colors } from "@/styles/colors"
 import { Link} from '@/components/Link'
 import { Option } from '@/components/options'
 import { categories } from '@/utils/categories'
+import { 
+    linkStorage, 
+    LinkStorage 
+} from '@/storage/link-storage'
+import { Category } from '@/components/category'
+
+
 
 export default function Index(){
+
     const [category, setCategory] = useState<string>(categories[0].name);
+    const [links, setLinks] = useState<LinkStorage[]>();
+    const [url, setUrl] = useState<string>('');
+
+    async function getLinks() {
+        try {
+            const response = await linkStorage.get();
+            setLinks(response);
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível obter os links:");
+        }
+    }
+
+    useEffect(() => {
+        getLinks();
+    }, [Category]);
+
     return(
         <View style={styles.container}>
             <View style={styles.header}>
@@ -24,20 +58,20 @@ export default function Index(){
 
             <Categories onChange={setCategory} selected={category}/>
          
-                     <FlatList
-                data={["1", "2", "3", "4", "5", "6"]}
-                keyExtractor={(item) => item}
-                renderItem={() => (
-                    <Link 
-                    name="Rocketseat"
-                    url="https://www.rocketseat.com.br/"
-                    onDetails={() => console.log("Clicou!")}
-                />
-                )}
+                <FlatList
+                    data={links}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({item}) => (
+                        <Link 
+                            name={item.name}
+                            url={item.url}
+                            onDetails={() => console.log("Clicou!")}
+                        />
+                    )}
                 style={styles.links}
                 contentContainerStyle={styles.linksContent}
-                showsVerticalScrollIndicator={false}
-            />
+                    showsVerticalScrollIndicator={false}
+                />
 
             <Modal transparent visible={false}>
                 <View style={styles.modal}>

@@ -51,8 +51,6 @@ export default function Add() {
         setCategory('');
         setName('');
         setUrl('');
-
-        console.log("Links salvos:", data);
       }
 
     } catch (error) {
