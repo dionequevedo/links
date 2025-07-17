@@ -5,7 +5,8 @@ import {
     FlatList, 
     Modal, 
     Text,
-    Alert 
+    Alert,
+    Linking
 } from 'react-native'
 
 import { MaterialIcons } from '@expo/vector-icons'
@@ -88,6 +89,22 @@ export default function Index(){
         );
     }
 
+    async function handleOpenLink() {
+        try {
+            if (link.url) {
+                const supported = await Linking.canOpenURL(link.url);
+                if (supported) {
+                    await Linking.openURL(link.url);
+                    setShowModal(false);
+                } 
+            }
+        } catch (error) {
+                Alert.alert("Erro", "Não foi possível abrir o link.");
+                console.log("Error opening link:", error);
+        }
+    }
+    
+
     useFocusEffect(
         useCallback(() => {
         getLinks();
@@ -145,7 +162,7 @@ export default function Index(){
                             {link ? link.url : ''}
                         </Text>
                         <View style={styles.modalFooter}>
-                            <Option name='Abrir' icon="language"/>
+                            <Option name='Abrir' icon="language" onPress={handleOpenLink}/>
                             <Option name='Excluir' icon='delete' variant='secondary' onPress={handleRemove}/>
                         </View>
                     </View>
