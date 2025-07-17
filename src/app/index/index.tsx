@@ -108,7 +108,7 @@ export default function Index(){
     useFocusEffect(
         useCallback(() => {
         getLinks();
-    }, [category])
+        }, [category])
     );
 
     return(
