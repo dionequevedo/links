@@ -28,8 +28,8 @@ export default function Add() {
       } else if (!url.trim() || url.length < 6) {
         return Alert.alert("URL não informada", "Informe o site!");
       } else {
-        // Validação de URL simples usando regex
-        const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/i;
+        // Validação de URL simples usando regex que aceita localhost e IPs
+        const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$|^(https?:\/\/)?localhost(:\d+)?(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$|^(https?:\/\/)?\d+\.\d+\.\d+\.\d+(:\d+)?(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/i;
         if (!urlPattern.test(url.trim())) {
           return Alert.alert("URL inválida", "Informe uma URL válida!");
         }
@@ -67,7 +67,7 @@ export default function Add() {
     return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity testID="button-back" onPress={() => router.back()}>
             <MaterialIcons name="arrow-back" size={32} color={colors.gray[200]} />
         </TouchableOpacity>
 

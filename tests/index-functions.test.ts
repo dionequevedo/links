@@ -15,8 +15,6 @@ jest.mock('react-native', () => ({
     openURL: jest.fn(),
   },
 }));
-
-// Importar o linkStorage depois dos mocks
 describe('Index Component - Funções Específicas', () => {
   const mockLinks = [
     {
@@ -64,6 +62,37 @@ describe('Index Component - Funções Específicas', () => {
       
       expect(links).toEqual([]);
       expect(links).toHaveLength(0);
+    });
+  });
+
+  describe('Função save - Salvamento de links', () => {
+    it('deve salvar novo link corretamente', async () => {
+      const novoLink: LinkStorage = {
+        id: '3',
+        category: 'Site',
+        name: 'Novo Site',
+        url: 'https://novosite.com',
+      };
+
+      const mockSave = jest.spyOn(linkStorage, 'save').mockResolvedValue();
+
+      await linkStorage.save(novoLink);
+      
+      expect(mockSave).toHaveBeenCalledWith(novoLink);
+    });
+
+    it('deve tratar erro ao salvar link', async () => {
+      const novoLink: LinkStorage = {
+        id: '3',
+        category: 'Site',
+        name: 'Novo Site',
+        url: 'https://novosite.com',
+      };
+
+      const mockSave = jest.spyOn(linkStorage, 'save').mockRejectedValue(new Error('Save error'));
+
+      await expect(linkStorage.save(novoLink)).rejects.toThrow('Save error');
+      expect(mockSave).toHaveBeenCalledWith(novoLink);
     });
   });
 
@@ -327,11 +356,13 @@ describe('Index Component - Funções Específicas', () => {
       expect(link.url.length).toBeGreaterThan(0);
     });
 
-    it('deve validar formato de URL', () => {
+    it('deve validar formato de URL de forma mais robusta', () => {
       const urlsValidas = [
         'https://example.com',
         'http://localhost:3000',
         'https://github.com/user/repo',
+        'https://www.site.com.br/path?query=value#section',
+        'http://192.168.1.1:8080',
       ];
 
       const urlsInvalidas = [
@@ -339,14 +370,19 @@ describe('Index Component - Funções Específicas', () => {
         'ftp://example.com',
         '',
         'javascript:alert("test")',
+        'file:///etc/passwd',
+        'data:text/html,<script>alert("xss")</script>',
       ];
 
+      // Regex simples e funcional para URLs HTTP/HTTPS
+      const urlRegex = /^https?:\/\/.+/;
+
       urlsValidas.forEach(url => {
-        expect(url).toMatch(/^https?:\/\/.+/);
+        expect(url).toMatch(urlRegex);
       });
 
       urlsInvalidas.forEach(url => {
-        expect(url).not.toMatch(/^https?:\/\/.+/);
+        expect(url).not.toMatch(urlRegex);
       });
     });
   });

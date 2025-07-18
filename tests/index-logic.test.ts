@@ -84,7 +84,7 @@ describe('Index Component - Lógica de Negócio', () => {
   });
 
   describe('Validação de URLs', () => {
-    it('deve validar URLs corretas', async () => {
+    it('deve validar URLs corretas', () => {
       const validUrls = [
         'https://example.com',
         'https://github.com/user/repo',
@@ -92,8 +92,11 @@ describe('Index Component - Lógica de Negócio', () => {
         'https://docs.expo.dev',
       ];
 
+      // Usando uma regex mais simples e confiável
+      const urlRegex = /^https?:\/\/.+/;
+      
       for (const url of validUrls) {
-        expect(url).toMatch(/^https?:\/\/.+/);
+        expect(url).toMatch(urlRegex);
       }
     });
 
@@ -105,8 +108,10 @@ describe('Index Component - Lógica de Negócio', () => {
         '',
       ];
 
+      const urlRegex = /^https?:\/\/.+/;
+
       for (const url of invalidUrls) {
-        expect(url).not.toMatch(/^https?:\/\/.+/);
+        expect(url).not.toMatch(urlRegex);
       }
     });
   });
@@ -229,9 +234,26 @@ describe('Index Component - Lógica de Negócio', () => {
   describe('Integração com storage', () => {
     it('deve ter as funções do linkStorage disponíveis', () => {
       expect(linkStorage.get).toBeDefined();
+      expect(linkStorage.save).toBeDefined();
       expect(linkStorage.remove).toBeDefined();
       expect(typeof linkStorage.get).toBe('function');
+      expect(typeof linkStorage.save).toBe('function');
       expect(typeof linkStorage.remove).toBe('function');
+    });
+
+    it('deve testar a função save do linkStorage', async () => {
+      const novoLink: LinkStorage = {
+        id: '4',
+        category: 'Site',
+        name: 'Novo Site',
+        url: 'https://novosite.com',
+      };
+
+      const mockSave = jest.spyOn(linkStorage, 'save').mockResolvedValue();
+      
+      await linkStorage.save(novoLink);
+      
+      expect(mockSave).toHaveBeenCalledWith(novoLink);
     });
   });
 

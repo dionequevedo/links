@@ -54,6 +54,8 @@ export default function Index(){
             }
         } catch (error) {
             Alert.alert("Erro", "Não foi possível obter os links:");
+            console.error("Error fetching links:", error);
+            setLinks([]);
         }
     }
 
